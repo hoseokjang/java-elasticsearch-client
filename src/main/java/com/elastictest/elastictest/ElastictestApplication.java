@@ -38,13 +38,13 @@ public class ElastictestApplication {
 		SpringApplication.run(ElastictestApplication.class, args);
 
 		String servelUrl = "https://localhost:9200";
-		String apiKey = "ejZoVUM0MEJsMEdHRTA5UHNCVnE6NzlLN1JpUW9STUtOeWFKUmcwVU9MZw==";
+		String apiKey = "SDRJU0VJMEIzZzc3ZWZzeVZseW86QmUtUjZYaHpRN2VFNVZFTmVpOU5vZw==";
 		String fingerprint = "59c7bb3baf0d584122be686f290c498741c3ce131da9708140057c5c71b64fa4";
 
 		SSLContext sslContext = TransportUtils.sslContextFromCaFingerprint(fingerprint);
 
 		BasicCredentialsProvider provider = new BasicCredentialsProvider();
-		provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("hs.jang", "chang!6509"));
+		provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("hs.jang", "123456"));
 
 
 		org.elasticsearch.client.RestClient restClient = org.elasticsearch.client.RestClient
@@ -63,7 +63,8 @@ public class ElastictestApplication {
 
 		Reader input = new StringReader(
 				"{'@timestamp': '2024-01-14T12:08:23', 'level': 'warn', 'message': 'Some log Message'}"
-						.replace('\'','"'));
+						.replace('\'','"')
+				);
 
 
 		IndexRequest<JsonData> request = IndexRequest.of(i -> i
@@ -78,7 +79,7 @@ public class ElastictestApplication {
 
 		IndexResponse response = esClient.index(request);
 
-		System.out.println("성공");
+		System.out.println("Indexed with version " + response.version());
 
 	}
 
