@@ -23,6 +23,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 import javax.net.ssl.SSLContext;
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -37,32 +38,44 @@ public class ElastictestApplication {
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(ElastictestApplication.class, args);
 
+		// url and security
 		String servelUrl = "https://localhost:9200";
 		String apiKey = "SDRJU0VJMEIzZzc3ZWZzeVZseW86QmUtUjZYaHpRN2VFNVZFTmVpOU5vZw==";
-		String fingerprint = "59c7bb3baf0d584122be686f290c498741c3ce131da9708140057c5c71b64fa4";
 
-		SSLContext sslContext = TransportUtils.sslContextFromCaFingerprint(fingerprint);
+		// verifying https with fingerprint or CA certificate
+		// String fingerprint = "59c7bb3baf0d584122be686f290c498741c3ce131da9708140057c5c71b64fa4";
+		File certFile = new File("D:/elasticsearch-8.11.4/config/certs/http_ca.crt");
+
+		//SSLContext sslContext = TransportUtils.sslContextFromCaFingerprint(fingerprint);
+		SSLContext sslContext = TransportUtils.sslContextFromHttpCaCrt(certFile);
+
 
 		BasicCredentialsProvider provider = new BasicCredentialsProvider();
 		provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("hs.jang", "123456"));
 
 
+		String host = "localhost";
+		Integer port = 9200;
+
+		// create the low-level client
 		org.elasticsearch.client.RestClient restClient = org.elasticsearch.client.RestClient
-				.builder(HttpHost.create(servelUrl))
+				.builder(new HttpHost(host, port, "https"))
 				.setDefaultHeaders(new Header[] {
 						new BasicHeader("Authorization", "Apikey" + apiKey)
 				})
-				.setHttpClientConfigCallback(httpAsyncClientBuilder -> httpAsyncClientBuilder
+				.setHttpClientConfigCallback(hc -> hc
 						.setSSLContext(sslContext)
 						.setDefaultCredentialsProvider(provider))
 				.build();
 
+		// create the transport with a Jackson Mapper
 		ElasticsearchTransport transport = new RestClientTransport(
 				restClient, new JacksonJsonpMapper()
 		);
 
+		// raw Json data
 		Reader input = new StringReader(
-				"{'@timestamp': '2024-01-14T12:08:23', 'level': 'warn', 'message': 'Some log Message'}"
+				"{'id': 1, '@timestamp': '2024-01-14T12:08:23', 'level': 'warn', 'message': 'Some log Message'}"
 						.replace('\'','"')
 				);
 
