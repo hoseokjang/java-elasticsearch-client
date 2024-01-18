@@ -39,7 +39,7 @@ public class ElastictestApplication {
 		SpringApplication.run(ElastictestApplication.class, args);
 
 		// url and security
-		String servelUrl = "https://localhost:9200";
+		// String servelUrl = "https://localhost:9200";
 		String apiKey = "SDRJU0VJMEIzZzc3ZWZzeVZseW86QmUtUjZYaHpRN2VFNVZFTmVpOU5vZw==";
 
 		// verifying https with fingerprint or CA certificate
@@ -51,15 +51,12 @@ public class ElastictestApplication {
 
 
 		BasicCredentialsProvider provider = new BasicCredentialsProvider();
-		provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("hs.jang", "123456"));
+		provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("root", "111111"));
 
-
-		String host = "localhost";
-		Integer port = 9200;
 
 		// create the low-level client
 		org.elasticsearch.client.RestClient restClient = org.elasticsearch.client.RestClient
-				.builder(new HttpHost(host, port, "https"))
+				.builder(new HttpHost("localhost", 9200, "https"))
 				.setDefaultHeaders(new Header[] {
 						new BasicHeader("Authorization", "Apikey" + apiKey)
 				})
