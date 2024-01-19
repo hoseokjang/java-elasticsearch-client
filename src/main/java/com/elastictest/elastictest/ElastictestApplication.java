@@ -1,15 +1,16 @@
 package com.elastictest.elastictest;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.IndexRequest;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.TransportUtils;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
-//import com.elastictest.elastictest.Entity.Book;
+import com.elastictest.elastictest.Entity.Book;
 //import com.elastictest.elastictest.Repository.SearchRepository;
+import com.elastictest.elastictest.Entity.Book;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -30,6 +31,7 @@ import java.io.StringReader;
 
 
 @SpringBootApplication
+@Slf4j
 //@EnableElasticsearchRepositories(includeFilters = {
 //		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SearchRepository.class)
 //})
@@ -55,11 +57,12 @@ public class ElastictestApplication {
 
 
 		// create the low-level client
+		// apikey를 주석하고 certfile만 사용하니 indexing 성공
 		org.elasticsearch.client.RestClient restClient = org.elasticsearch.client.RestClient
 				.builder(new HttpHost("localhost", 9200, "https"))
-				.setDefaultHeaders(new Header[] {
-						new BasicHeader("Authorization", "Apikey" + apiKey)
-				})
+//				.setDefaultHeaders(new Header[] {
+//						new BasicHeader("Authorization", "Apikey" + apiKey)
+//				})
 				.setHttpClientConfigCallback(hc -> hc
 						.setSSLContext(sslContext)
 						.setDefaultCredentialsProvider(provider))
@@ -85,11 +88,27 @@ public class ElastictestApplication {
 		ElasticsearchClient esClient = new ElasticsearchClient(transport);
 
 		// create index
-//		esClient.indices().create(c -> c.index("logs"));
+//		esClient.indices().create(c -> c.index("logs_java"));
 
-		IndexResponse response = esClient.index(request);
+//		IndexResponse response = esClient.index(request);
 
-		System.out.println("Indexed with version " + response.version());
+//		System.out.println("Indexed with version " + response.version());
+
+
+
+		// Reading Document by id
+		GetResponse<Book> response = esClient.get(g -> g
+				.index("book")
+				.id("1"),
+				Book.class
+		);
+
+		if (response.found()) {
+			Book book = response.source();
+			System.out.println("Book name " + book.getAuthor());
+		} else {
+			System.out.println("Not found");
+		}
 
 	}
 
