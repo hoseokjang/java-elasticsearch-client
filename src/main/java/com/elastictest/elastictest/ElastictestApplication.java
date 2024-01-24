@@ -2,6 +2,8 @@ package com.elastictest.elastictest;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.*;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.core.search.TotalHits;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
@@ -28,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.List;
 
 
 @SpringBootApplication
@@ -97,18 +100,49 @@ public class ElastictestApplication {
 
 
 		// Reading Document by id
-		GetResponse<Book> response = esClient.get(g -> g
+//		GetResponse<Book> response = esClient.get(g -> g
+//				.index("book")
+//				.id("1"),
+//				Book.class
+//		);
+
+//		if (response.found()) {
+//			Book book = response.source();
+//			System.out.println("Book name " + book.getAuthor());
+//		} else {
+//			System.out.println("Not found");
+//		}
+
+
+		// Searching for Document
+		String searchText = "kim";
+
+		SearchResponse<Book> searchResponse = esClient.search(s -> s
 				.index("book")
-				.id("1"),
+				.query(q -> q
+						.match(t -> t
+								.field("author")
+								.query(searchText)
+						)
+				),
 				Book.class
 		);
 
-		if (response.found()) {
-			Book book = response.source();
-			System.out.println("Book name " + book.getAuthor());
-		} else {
-			System.out.println("Not found");
+		TotalHits totalHits = searchResponse.hits().total();
+
+		System.out.println("total hits: " + totalHits);
+
+		try {
+			List<Hit<Book>> hits = searchResponse.hits().hits();
+			for (Hit<Book> hit: hits) {
+				Book book = hit.source();
+				System.out.println("Found Book " + book.getAuthor() + ", score " + hit.score());
+			}
+
+		} catch (NullPointerException e) {
+			System.out.println(e);
 		}
+
 
 	}
 
