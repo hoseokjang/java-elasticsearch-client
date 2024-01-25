@@ -161,14 +161,11 @@ public class ElastictestApplication {
 				Book.class
 		);
 
-
 		List<Hit<Book>> hits = response.hits().hits();
 		for (Hit<Book> hit: hits) {
 			Book book = hit.source();
-			System.out.println("book name : " +book.getName());
+			System.out.println("book name : " + book.getName());
 		}
-
-
 
 	}
 
