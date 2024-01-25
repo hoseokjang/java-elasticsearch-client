@@ -115,33 +115,59 @@ public class ElastictestApplication {
 
 
 		// Searching for Document
-		String searchText = "kim";
+//		String searchText = "kim";
+//
+//		SearchResponse<Book> searchResponse = esClient.search(s -> s
+//				.index("book")
+//				.query(q -> q
+//						.match(t -> t
+//								.field("author")
+//								.query(searchText)
+//						)
+//				),
+//				Book.class
+//		);
+//
+//		TotalHits totalHits = searchResponse.hits().total();
+//
+//		System.out.println("total hits: " + totalHits);
+//
+//		try {
+//			List<Hit<Book>> hits = searchResponse.hits().hits();
+//			for (Hit<Book> hit: hits) {
+//				Book book = hit.source();
+//				System.out.println("Found Book " + book.getAuthor() + ", score " + hit.score());
+//			}
+//
+//		} catch (NullPointerException e) {
+//			System.out.println(e);
+//		}
 
-		SearchResponse<Book> searchResponse = esClient.search(s -> s
+
+		// Create a Script
+//		esClient.putScript(r -> r
+//				.id("book-template")
+//				.script(s -> s
+//						.lang("mustache")
+//						.source("{\"query\":{\"match\":{\"{{field}}\":\"{{value}}\"}}}")
+//				));
+
+		// Use Search Template
+		SearchTemplateResponse<Book> response = esClient.searchTemplate(r -> r
 				.index("book")
-				.query(q -> q
-						.match(t -> t
-								.field("author")
-								.query(searchText)
-						)
-				),
+				.id("book-template")
+				.params("field", JsonData.of("author"))
+				.params("value",JsonData.of("kim")),
 				Book.class
 		);
 
-		TotalHits totalHits = searchResponse.hits().total();
 
-		System.out.println("total hits: " + totalHits);
-
-		try {
-			List<Hit<Book>> hits = searchResponse.hits().hits();
-			for (Hit<Book> hit: hits) {
-				Book book = hit.source();
-				System.out.println("Found Book " + book.getAuthor() + ", score " + hit.score());
-			}
-
-		} catch (NullPointerException e) {
-			System.out.println(e);
+		List<Hit<Book>> hits = response.hits().hits();
+		for (Hit<Book> hit: hits) {
+			Book book = hit.source();
+			System.out.println("book name : " +book.getName());
 		}
+
 
 
 	}
