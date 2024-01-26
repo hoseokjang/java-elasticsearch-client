@@ -1,6 +1,9 @@
 package com.elastictest.elastictest;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.aggregations.HistogramBucket;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.TotalHits;
@@ -165,6 +168,34 @@ public class ElastictestApplication {
 		for (Hit<Book> hit: hits) {
 			Book book = hit.source();
 			System.out.println("book name : " + book.getName());
+		}
+
+		// Aggregation
+		String searchText = "kim";
+
+		Query query = MatchQuery.of(m -> m
+				.field("author")
+				.query(searchText)
+		)._toQuery();
+
+		SearchResponse<Void> response2 = esClient.search(b -> b
+				.index("book")
+				.size(0)
+				.query(query)
+				.aggregations("price-histogram", a -> a
+						.histogram(h -> h
+								.field("price")
+								.interval(50.0)))
+		, Void.class);
+
+		List<HistogramBucket> buckets = response2.aggregations()
+				.get("price-histogram")
+				.histogram()
+				.buckets().array();
+
+		for (HistogramBucket bucket: buckets) {
+			System.out.println("There are " + bucket.docCount() +
+					" book under " + bucket.key());
 		}
 
 	}

@@ -10,14 +10,6 @@ public class Book {
     @Field(name = "id", type = FieldType.Integer)
     private Integer id;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     @Field(name = "bookId", type = FieldType.Long)
     private String bookId;
 
@@ -27,6 +19,16 @@ public class Book {
     @Field(name = "author", type = FieldType.Text)
     private String author;
 
+    @Field(name = "price", type = FieldType.Integer)
+    private Integer price;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
     public void setName(String name) {
         this.name = name;
     }
@@ -49,5 +51,13 @@ public class Book {
 
     public String getAuthor() {
         return author;
+    }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
     }
 }
