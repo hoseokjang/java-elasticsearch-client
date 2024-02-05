@@ -1,6 +1,7 @@
 package com.elastictest.elastictest;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._helpers.bulk.BulkIngester;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 @SpringBootApplication
@@ -197,6 +199,26 @@ public class ElastictestApplication {
 			System.out.println("There are " + bucket.docCount() +
 					" book under " + bucket.key());
 		}
+
+
+		// Bulk Indexing
+		List<Book> bookList = fetchBooks();
+
+		BulkRequest.Builder br = new BulkRequest.Builder();
+
+		BulkIngester<Void> ingester = BulkIngester.of(b -> b
+				.client(esClient)
+				.maxOperations(100)
+				.flushInterval(1, TimeUnit.SECONDS)
+		);
+
+		for (Book book: bookList) {
+			ingester.add(op -> op
+					.index(idx -> idx
+							.index("bookList")
+							.document(book)));
+		}
+
 
 	}
 
